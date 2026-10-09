@@ -2,13 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Optimized viewport: prevents accidental zooming on Android when tapping inputs -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The SiX | Premium Ontario Tax Hub</title>
     
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@300;400;600&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -17,9 +14,9 @@
             --neon-magenta: #e81cff;
             --neon-cyan: #40c9ff;
             --gold: #d4af37;
-            /* Optimized for Moto G Play: less transparency, less blur needed = higher FPS */
             --glass-bg: rgba(20, 20, 25, 0.85); 
             --glass-border: rgba(255, 255, 255, 0.1);
+            --danger-red: #ff3333;
         }
 
         * {
@@ -27,7 +24,6 @@
             margin: 0;
             padding: 0;
             font-family: 'Inter', sans-serif;
-            /* Smoother scrolling on 90Hz Motorola displays */
             scroll-behavior: smooth; 
         }
 
@@ -36,19 +32,18 @@
             color: #fff;
             min-height: 100vh;
             overflow-x: hidden;
-            /* Padding for Android bottom navigation bar */
             padding-bottom: 40px; 
         }
 
         /* --- Hero Banner & Vibe --- */
         .hero {
             position: relative;
-            height: 35vh; /* Reduced from 50vh for better mobile real estate */
+            height: 30vh; 
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.5), var(--bg-color)),
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6), var(--bg-color)),
                         url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=800&auto=format&fit=crop') center/cover;
             border-bottom: 2px solid var(--neon-magenta);
             box-shadow: 0 10px 40px rgba(232, 28, 255, 0.2);
@@ -63,7 +58,7 @@
 
         h1.logo {
             font-family: 'Cinzel', serif;
-            font-size: 2.8rem; /* Scaled down for 720p 6.5" screen */
+            font-size: 2.8rem; 
             color: #fff;
             text-shadow: 0 0 15px var(--neon-magenta);
             letter-spacing: 3px;
@@ -81,26 +76,24 @@
         /* --- Main Layout --- */
         .container {
             max-width: 1200px;
-            margin: -30px auto 20px;
+            margin: -20px auto 20px;
             padding: 0 15px;
             position: relative;
             z-index: 10;
             display: grid;
-            grid-template-columns: 1fr; /* Default to mobile single column */
+            grid-template-columns: 1fr; 
             gap: 20px;
         }
 
-        /* Desktop override */
         @media (min-width: 900px) {
             .container { grid-template-columns: 1.5fr 1fr; }
             h1.logo { font-size: 5rem; }
-            .hero { height: 50vh; }
+            .hero { height: 40vh; }
         }
 
         /* --- Glassmorphism Cards --- */
         .glass-card {
             background: var(--glass-bg);
-            /* Reduced blur from 16px to 8px to maintain 60/90fps on Moto G Play Snapdragon 680 */
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--glass-border);
@@ -113,7 +106,7 @@
             font-family: 'Cinzel', serif;
             color: var(--gold);
             margin-bottom: 15px;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             border-bottom: 1px solid rgba(212, 175, 55, 0.3);
             padding-bottom: 8px;
         }
@@ -131,7 +124,6 @@
             font-size: 0.85rem;
         }
 
-        /* Font size MUST be exactly 16px or higher to stop Android browsers from auto-zooming */
         input[type="text"], input[type="number"], select {
             width: 100%;
             padding: 14px;
@@ -139,10 +131,10 @@
             border: 1px solid var(--glass-border);
             color: #fff;
             border-radius: 10px;
-            font-size: 16px; 
+            font-size: 16px; /* Locks Android Zoom */
             outline: none;
             transition: all 0.2s;
-            appearance: none; /* Removes native styling on Android select box */
+            appearance: none; 
         }
 
         input:focus, select:focus {
@@ -152,7 +144,7 @@
 
         .calc-flex-container {
             display: flex;
-            flex-direction: column; /* Stack vertically on Moto to ensure big tap targets */
+            flex-direction: column; 
             gap: 10px;
         }
 
@@ -164,7 +156,7 @@
             background: linear-gradient(45deg, var(--neon-magenta), #9b00e8);
             color: white;
             border: none;
-            padding: 16px 20px; /* Thicker for thumb taps */
+            padding: 16px 20px;
             border-radius: 10px;
             font-size: 1rem;
             font-weight: 600;
@@ -180,8 +172,40 @@
             gap: 10px;
         }
 
-        .btn:active {
-            transform: scale(0.98); /* Tactile feedback for mobile tap */
+        .btn:active { transform: scale(0.98); }
+
+        /* --- Budget Vault --- */
+        .vault-container {
+            margin-bottom: 25px;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(64, 201, 255, 0.2);
+        }
+
+        .progress-bg {
+            width: 100%;
+            height: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 15px 0 10px 0;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+            width: 0%;
+            transition: width 0.4s ease, background-color 0.3s ease;
+            box-shadow: 0 0 10px var(--neon-magenta);
+        }
+
+        .vault-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
 
         /* --- Oracle Search Results --- */
@@ -209,7 +233,7 @@
         /* --- Ledger & Cloud Sync --- */
         .ledger-list {
             list-style: none;
-            max-height: 250px; /* Slightly shorter for 720x1600 screen */
+            max-height: 200px; 
             overflow-y: auto;
             scrollbar-width: thin;
             scrollbar-color: var(--neon-magenta) transparent;
@@ -238,11 +262,6 @@
             text-align: center;
             font-size: 0.85rem;
         }
-
-        /* Scrollbar styling for webkit */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--neon-magenta); border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -258,7 +277,7 @@
     <!-- Main Content -->
     <div class="container">
         
-        <!-- Left Column: The Oracle -->
+        <!-- Left Column: The Oracle & Calculator -->
         <div class="glass-card">
             <h2><i class="fa-solid fa-magnifying-glass-chart"></i> The Oracle</h2>
             <p style="color: #aaa; margin-bottom: 15px; font-size: 0.85rem; line-height: 1.4;">
@@ -277,7 +296,6 @@
                 <div id="res-tag" class="tax-tag"></div>
             </div>
 
-            <!-- Manual Calculator -->
             <h2 style="margin-top: 30px;"><i class="fa-solid fa-calculator"></i> Quick Compute</h2>
             <div class="calc-flex-container">
                 <div class="input-group">
@@ -294,13 +312,36 @@
                 </div>
             </div>
             <button class="btn" onclick="calculateAndSave()" style="background: linear-gradient(45deg, var(--gold), #997300); color: #000;">
-                <i class="fa-solid fa-plus"></i> Calculate & Log
+                <i class="fa-solid fa-plus"></i> Compute & Log to Vault
             </button>
         </div>
 
-        <!-- Right Column: The Ledger -->
+        <!-- Right Column: The Vault & Ledger -->
         <div class="glass-card">
-            <h2><i class="fa-solid fa-book-journal-whills"></i> The Ledger</h2>
+            
+            <!-- NEW BUDGET VAULT FEATURE -->
+            <h2><i class="fa-solid fa-vault"></i> The Vault</h2>
+            <div class="vault-container">
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="budget-input" placeholder="Set Monthly Budget $" inputmode="decimal" style="flex: 1; padding: 12px; font-size: 16px; border-radius: 8px;">
+                    <button onclick="setBudget()" style="background: var(--neon-cyan); color: #000; font-weight: bold; border: none; border-radius: 8px; padding: 0 15px; cursor: pointer;">SET</button>
+                </div>
+                
+                <div class="progress-bg">
+                    <div class="progress-fill" id="budget-bar"></div>
+                </div>
+                
+                <div class="vault-stats">
+                    <span id="budget-spent" style="color: #bbb;">Spent: $0.00</span>
+                    <span id="budget-remaining" style="color: var(--neon-cyan);">Left: $0.00</span>
+                </div>
+            </div>
+
+            <!-- EXISTING LEDGER -->
+            <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid rgba(212, 175, 55, 0.3); padding-bottom: 8px; margin-bottom: 15px;">
+                <h2 style="border: none; margin: 0; padding: 0;"><i class="fa-solid fa-book-journal-whills"></i> Ledger</h2>
+                <button onclick="clearLedger()" style="background: none; border: 1px solid rgba(255,255,255,0.2); color: #aaa; font-size: 0.7rem; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Clear Cycle</button>
+            </div>
             
             <ul class="ledger-list" id="ledger-list">
                 <!-- Items populated by JS -->
@@ -367,8 +408,6 @@
             const calcRateSelect = document.getElementById('calc-rate');
 
             if(!input.trim()) return;
-
-            // Hide keyboard on Android after search
             document.getElementById('productSearch').blur(); 
 
             let matchedRule = null;
@@ -392,8 +431,9 @@
             resDiv.style.display = 'block';
         }
 
-        // --- 2. CLOUD SYNC & LEDGER ---
+        // --- 2. VAULT & LEDGER LOGIC ---
         let ledgerData = [];
+        let vaultBudget = 0;
         let syncId = localStorage.getItem('theSix_SyncID');
 
         if(!syncId) {
@@ -403,10 +443,57 @@
         document.getElementById('device-id').innerText = syncId;
 
         function init() {
-            const saved = localStorage.getItem(`theSix_Ledger_${syncId}`);
-            if(saved) {
-                ledgerData = JSON.parse(saved);
-                renderLedger();
+            const savedLedger = localStorage.getItem(`theSix_Ledger_${syncId}`);
+            const savedBudget = localStorage.getItem(`theSix_Vault_${syncId}`);
+            
+            if(savedLedger) ledgerData = JSON.parse(savedLedger);
+            if(savedBudget) vaultBudget = parseFloat(savedBudget);
+            
+            if(vaultBudget > 0) document.getElementById('budget-input').value = vaultBudget;
+
+            renderLedger();
+            updateVaultUI();
+        }
+
+        function setBudget() {
+            const val = parseFloat(document.getElementById('budget-input').value);
+            if(!isNaN(val) && val >= 0) {
+                vaultBudget = val;
+                localStorage.setItem(`theSix_Vault_${syncId}`, vaultBudget);
+                document.getElementById('budget-input').blur();
+                updateVaultUI();
+            }
+        }
+
+        function updateVaultUI() {
+            let totalSpent = ledgerData.reduce((acc, curr) => acc + parseFloat(curr.total), 0);
+            let remaining = vaultBudget - totalSpent;
+            
+            let percent = 0;
+            if (vaultBudget > 0) {
+                percent = Math.min((totalSpent / vaultBudget) * 100, 100);
+            }
+
+            const bar = document.getElementById('budget-bar');
+            const remText = document.getElementById('budget-remaining');
+            
+            bar.style.width = percent + '%';
+            document.getElementById('budget-spent').innerText = `Spent: $${totalSpent.toFixed(2)}`;
+
+            if (vaultBudget === 0) {
+                remText.innerText = "No Budget Set";
+                remText.style.color = "#888";
+                bar.style.background = "rgba(255,255,255,0.1)";
+            } else if (percent >= 100) {
+                remText.innerText = `Over by: $${Math.abs(remaining).toFixed(2)}`;
+                remText.style.color = "var(--danger-red)";
+                bar.style.background = "var(--danger-red)";
+                bar.style.boxShadow = "0 0 15px var(--danger-red)";
+            } else {
+                remText.innerText = `Left: $${remaining.toFixed(2)}`;
+                remText.style.color = "var(--neon-cyan)";
+                bar.style.background = "linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta))";
+                bar.style.boxShadow = "0 0 10px var(--neon-magenta)";
             }
         }
 
@@ -420,7 +507,7 @@
                 return;
             }
 
-            amtInput.blur(); // Hide keyboard
+            amtInput.blur(); 
 
             let actualRate = rate;
             let note = "";
@@ -448,6 +535,9 @@
             ledgerData.unshift(entry);
             saveToCloud();
             renderLedger();
+            updateVaultUI(); // Update progress bar
+            
+            amtInput.value = ''; // clear input after log
         }
 
         function renderLedger() {
@@ -455,7 +545,7 @@
             list.innerHTML = '';
 
             if(ledgerData.length === 0) {
-                list.innerHTML = '<li style="color: #666; text-align: center; padding: 20px; font-size: 0.9rem;">No records. Calculate something above.</li>';
+                list.innerHTML = '<li style="color: #666; text-align: center; padding: 20px; font-size: 0.85rem;">Ledger is empty. Logs will appear here.</li>';
                 return;
             }
 
@@ -478,6 +568,15 @@
             });
         }
 
+        function clearLedger() {
+            if(confirm("Are you sure you want to clear your current Ledger? This will reset your budget spending.")) {
+                ledgerData = [];
+                saveToCloud();
+                renderLedger();
+                updateVaultUI();
+            }
+        }
+
         function saveToCloud() {
             localStorage.setItem(`theSix_Ledger_${syncId}`, JSON.stringify(ledgerData));
         }
@@ -489,15 +588,8 @@
                 localStorage.setItem('theSix_SyncID', syncId);
                 document.getElementById('device-id').innerText = syncId;
                 
-                const saved = localStorage.getItem(`theSix_Ledger_${syncId}`);
-                if(saved) {
-                    ledgerData = JSON.parse(saved);
-                    alert("Ledger synchronized.");
-                } else {
-                    ledgerData = [];
-                    alert("Connected. No history found.");
-                }
-                renderLedger();
+                init(); // Reload from storage
+                alert("Vault and Ledger synchronized to device ID.");
             } else if (enteredId) {
                 alert("Invalid Sync ID.");
             }

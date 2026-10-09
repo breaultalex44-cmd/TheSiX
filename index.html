@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Optimized viewport: prevents accidental zooming on Android when tapping inputs -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The SiX | Premium Ontario Tax Hub</title>
+    
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@300;400;600&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
     <!-- FontAwesome -->
@@ -15,7 +17,8 @@
             --neon-magenta: #e81cff;
             --neon-cyan: #40c9ff;
             --gold: #d4af37;
-            --glass-bg: rgba(20, 20, 25, 0.7);
+            /* Optimized for Moto G Play: less transparency, less blur needed = higher FPS */
+            --glass-bg: rgba(20, 20, 25, 0.85); 
             --glass-border: rgba(255, 255, 255, 0.1);
         }
 
@@ -24,6 +27,8 @@
             margin: 0;
             padding: 0;
             font-family: 'Inter', sans-serif;
+            /* Smoother scrolling on 90Hz Motorola displays */
+            scroll-behavior: smooth; 
         }
 
         body {
@@ -31,192 +36,211 @@
             color: #fff;
             min-height: 100vh;
             overflow-x: hidden;
+            /* Padding for Android bottom navigation bar */
+            padding-bottom: 40px; 
         }
 
         /* --- Hero Banner & Vibe --- */
         .hero {
             position: relative;
-            height: 50vh;
+            height: 35vh; /* Reduced from 50vh for better mobile real estate */
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.3), var(--bg-color)),
-                        url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=2574&auto=format&fit=crop') center/cover;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5), var(--bg-color)),
+                        url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=800&auto=format&fit=crop') center/cover;
             border-bottom: 2px solid var(--neon-magenta);
             box-shadow: 0 10px 40px rgba(232, 28, 255, 0.2);
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, transparent 20%, #050505 90%);
         }
 
         .title-container {
             position: relative;
             z-index: 2;
             text-align: center;
+            padding: 0 15px;
         }
 
         h1.logo {
             font-family: 'Cinzel', serif;
-            font-size: 5rem;
+            font-size: 2.8rem; /* Scaled down for 720p 6.5" screen */
             color: #fff;
-            text-shadow: 0 0 20px var(--neon-magenta), 0 0 40px var(--neon-magenta);
-            letter-spacing: 5px;
-            margin-bottom: 10px;
+            text-shadow: 0 0 15px var(--neon-magenta);
+            letter-spacing: 3px;
+            margin-bottom: 5px;
         }
 
         .subtitle {
             font-family: 'Orbitron', sans-serif;
             color: var(--neon-cyan);
-            letter-spacing: 3px;
-            font-size: 1.2rem;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
             text-transform: uppercase;
         }
 
         /* --- Main Layout --- */
         .container {
             max-width: 1200px;
-            margin: -40px auto 50px;
-            padding: 0 20px;
+            margin: -30px auto 20px;
+            padding: 0 15px;
             position: relative;
             z-index: 10;
             display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            gap: 30px;
+            grid-template-columns: 1fr; /* Default to mobile single column */
+            gap: 20px;
         }
 
-        @media (max-width: 900px) {
-            .container { grid-template-columns: 1fr; }
+        /* Desktop override */
+        @media (min-width: 900px) {
+            .container { grid-template-columns: 1.5fr 1fr; }
+            h1.logo { font-size: 5rem; }
+            .hero { height: 50vh; }
         }
 
         /* --- Glassmorphism Cards --- */
         .glass-card {
             background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            /* Reduced blur from 16px to 8px to maintain 60/90fps on Moto G Play Snapdragon 680 */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
         }
 
         h2 {
             font-family: 'Cinzel', serif;
             color: var(--gold);
-            margin-bottom: 20px;
-            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
             border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
 
         /* --- Inputs & Buttons --- */
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            width: 100%;
         }
 
         .input-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: #aaa;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
-        input[type="text"], input[type="number"] {
+        /* Font size MUST be exactly 16px or higher to stop Android browsers from auto-zooming */
+        input[type="text"], input[type="number"], select {
             width: 100%;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.08);
             border: 1px solid var(--glass-border);
             color: #fff;
             border-radius: 10px;
-            font-size: 1rem;
+            font-size: 16px; 
             outline: none;
-            transition: all 0.3s;
+            transition: all 0.2s;
+            appearance: none; /* Removes native styling on Android select box */
         }
 
-        input[type="text"]:focus, input[type="number"]:focus {
+        input:focus, select:focus {
             border-color: var(--neon-cyan);
-            box-shadow: 0 0 15px rgba(64, 201, 255, 0.3);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .calc-flex-container {
+            display: flex;
+            flex-direction: column; /* Stack vertically on Moto to ensure big tap targets */
+            gap: 10px;
+        }
+
+        @media (min-width: 600px) {
+            .calc-flex-container { flex-direction: row; }
         }
 
         .btn {
             background: linear-gradient(45deg, var(--neon-magenta), #9b00e8);
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 16px 20px; /* Thicker for thumb taps */
             border-radius: 10px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
             font-family: 'Orbitron', sans-serif;
-            transition: 0.3s;
+            transition: 0.2s;
             text-transform: uppercase;
             letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .btn:hover {
-            box-shadow: 0 0 20px var(--neon-magenta);
-            transform: translateY(-2px);
+        .btn:active {
+            transform: scale(0.98); /* Tactile feedback for mobile tap */
         }
 
         /* --- Oracle Search Results --- */
         #oracle-result {
-            margin-top: 20px;
-            padding: 20px;
+            margin-top: 15px;
+            padding: 15px;
             border-radius: 10px;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.6);
             border-left: 4px solid var(--neon-cyan);
             display: none;
         }
 
         .tax-tag {
             display: inline-block;
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: bold;
             margin-top: 10px;
         }
-        .tag-exempt { background: rgba(0, 255, 100, 0.2); color: #00ff64; border: 1px solid #00ff64; }
-        .tag-hst { background: rgba(255, 0, 100, 0.2); color: #ff0064; border: 1px solid #ff0064; }
-        .tag-special { background: rgba(255, 200, 0, 0.2); color: #ffc800; border: 1px solid #ffc800; }
+        .tag-exempt { background: rgba(0, 255, 100, 0.15); color: #00ff64; border: 1px solid #00ff64; }
+        .tag-hst { background: rgba(255, 0, 100, 0.15); color: #ff0064; border: 1px solid #ff0064; }
+        .tag-special { background: rgba(255, 200, 0, 0.15); color: #ffc800; border: 1px solid #ffc800; }
 
         /* --- Ledger & Cloud Sync --- */
         .ledger-list {
             list-style: none;
-            max-height: 300px;
+            max-height: 250px; /* Slightly shorter for 720x1600 screen */
             overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--neon-magenta) transparent;
         }
 
         .ledger-item {
-            background: rgba(255,255,255,0.03);
-            padding: 15px;
-            margin-bottom: 10px;
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            margin-bottom: 8px;
             border-radius: 8px;
-            border-left: 2px solid var(--gold);
+            border-left: 3px solid var(--gold);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
+        .ledger-item-left { max-width: 60%; }
+        .ledger-item-right { text-align: right; font-size: 0.8rem; color: #aaa; }
+
         .cloud-sync-bar {
-            background: rgba(64, 201, 255, 0.1);
-            border: 1px solid var(--neon-cyan);
-            padding: 15px;
+            background: rgba(64, 201, 255, 0.05);
+            border: 1px solid rgba(64, 201, 255, 0.3);
+            padding: 12px;
             border-radius: 10px;
-            margin-top: 20px;
+            margin-top: 15px;
             text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
-        .cloud-sync-bar i { color: var(--neon-cyan); margin-right: 8px; }
-
-        /* Scrollbar styling */
-        ::-webkit-scrollbar { width: 6px; }
+        /* Scrollbar styling for webkit */
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--neon-magenta); border-radius: 10px; }
     </style>
@@ -227,7 +251,7 @@
     <header class="hero">
         <div class="title-container">
             <h1 class="logo">The SiX</h1>
-            <p class="subtitle">Ontario Shop Tax Oracle & Ledger</p>
+            <p class="subtitle">Ontario Shop Tax Oracle</p>
         </div>
     </header>
 
@@ -237,60 +261,56 @@
         <!-- Left Column: The Oracle -->
         <div class="glass-card">
             <h2><i class="fa-solid fa-magnifying-glass-chart"></i> The Oracle</h2>
-            <p style="color: #aaa; margin-bottom: 20px; font-size: 0.9rem;">
-                Search any product scenario (e.g. "six muffin bakery from loblaws", "Wendys meal"). Our engine applies highly specific Ontario tax laws.
+            <p style="color: #aaa; margin-bottom: 15px; font-size: 0.85rem; line-height: 1.4;">
+                Search a scenario (e.g. "six muffin bakery", "Wendys meal").
             </p>
             
             <div class="input-group">
-                <input type="text" id="productSearch" placeholder="Describe the item or scenario..." autocomplete="off">
+                <input type="text" id="productSearch" placeholder="Describe the item..." autocomplete="off">
             </div>
             
             <button class="btn" onclick="analyzeTax()"><i class="fa-solid fa-bolt"></i> Analyze Product</button>
 
             <div id="oracle-result">
-                <h3 id="res-title" style="color: var(--neon-cyan); margin-bottom: 10px; font-family: 'Orbitron', sans-serif;"></h3>
-                <p id="res-desc" style="color: #ddd; line-height: 1.5; font-size: 0.95rem;"></p>
+                <h3 id="res-title" style="color: var(--neon-cyan); margin-bottom: 8px; font-family: 'Orbitron', sans-serif; font-size: 1.1rem;"></h3>
+                <p id="res-desc" style="color: #ddd; line-height: 1.4; font-size: 0.85rem;"></p>
                 <div id="res-tag" class="tax-tag"></div>
             </div>
 
-            <!-- Manual Calculator embedded below Oracle -->
-            <h2 style="margin-top: 40px;"><i class="fa-solid fa-calculator"></i> Quick Compute</h2>
-            <div style="display: flex; gap: 15px;">
-                <div class="input-group" style="flex: 1;">
+            <!-- Manual Calculator -->
+            <h2 style="margin-top: 30px;"><i class="fa-solid fa-calculator"></i> Quick Compute</h2>
+            <div class="calc-flex-container">
+                <div class="input-group">
                     <label>Subtotal ($)</label>
-                    <input type="number" id="calc-amount" placeholder="0.00" step="0.01">
+                    <input type="number" id="calc-amount" placeholder="0.00" step="0.01" inputmode="decimal">
                 </div>
-                <div class="input-group" style="flex: 1;">
+                <div class="input-group">
                     <label>Tax Rate</label>
-                    <select id="calc-rate" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #fff; border-radius: 10px; outline: none; appearance: none;">
+                    <select id="calc-rate">
                         <option value="0.13" style="color: black;">13% HST (Standard)</option>
                         <option value="0.05" style="color: black;">5% GST (Prepared < $4)</option>
                         <option value="0" style="color: black;">0% (Exempt)</option>
                     </select>
                 </div>
             </div>
-            <button class="btn" onclick="calculateAndSave()" style="background: linear-gradient(45deg, var(--gold), #b8860b); color: #000;">
-                Calculate & Log
+            <button class="btn" onclick="calculateAndSave()" style="background: linear-gradient(45deg, var(--gold), #997300); color: #000;">
+                <i class="fa-solid fa-plus"></i> Calculate & Log
             </button>
         </div>
 
-        <!-- Right Column: The Ledger (Saved items) -->
+        <!-- Right Column: The Ledger -->
         <div class="glass-card">
             <h2><i class="fa-solid fa-book-journal-whills"></i> The Ledger</h2>
-            <p style="color: #aaa; margin-bottom: 20px; font-size: 0.9rem;">Your permanent, device-synced transaction history.</p>
             
             <ul class="ledger-list" id="ledger-list">
                 <!-- Items populated by JS -->
             </ul>
 
             <div class="cloud-sync-bar">
-                <i class="fa-solid fa-cloud"></i> 
-                <span id="sync-status">Cloud Sync Active. Device ID: <strong style="color: var(--neon-cyan)" id="device-id"></strong></span>
-                <p style="font-size: 0.75rem; color: #888; margin-top: 10px;">
-                    This ledger securely saves to your browser. Use the Sync ID above to access your ledger permanently from any device.
-                </p>
-                <button onclick="promptRestore()" style="background: none; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 5px 10px; border-radius: 5px; margin-top: 10px; cursor: pointer;">
-                    Import Existing Sync ID
+                <i class="fa-solid fa-cloud" style="color: var(--neon-cyan);"></i> 
+                <span id="sync-status">Sync ID: <strong style="color: var(--neon-cyan)" id="device-id"></strong></span>
+                <button onclick="promptRestore()" style="background: none; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 8px; border-radius: 5px; margin-top: 10px; cursor: pointer; width: 100%; font-weight: bold;">
+                    <i class="fa-solid fa-rotate"></i> Import Device ID
                 </button>
             </div>
         </div>
@@ -298,62 +318,43 @@
     </div>
 
     <script>
-        // --- 1. THE ORACLE TAX ENGINE (Ontario Tax Laws) ---
-        // Rules are processed top to bottom. First match wins.
+        // --- 1. THE ORACLE TAX ENGINE ---
         const taxRules = [
             {
-                // Basic groceries exemption for 6+ sweet baked goods
                 regex: /(6|six|7|seven|8|eight|9|nine|10|ten|11|eleven|12|dozen|multiple|box of).*(muffin|donut|doughnut|cookie|croissant|pastry|tart)/i,
                 title: "Basic Groceries (Zero-Rated)",
-                desc: "Under Ontario/CRA rules, purchasing 6 or more sweet baked goods at a time categorizes them as basic groceries, making them 100% tax exempt.",
-                tagClass: "tag-exempt",
-                tagName: "0% TAX (EXEMPT)",
-                autoRate: 0
+                desc: "Purchasing 6+ sweet baked goods categorizes them as basic groceries (100% tax exempt).",
+                tagClass: "tag-exempt", tagName: "0% TAX (EXEMPT)", autoRate: 0
             },
             {
-                // Single/less than 6 baked goods
                 regex: /(1|one|single|2|two|3|three|4|four|5|five).*(muffin|donut|doughnut|cookie|croissant|pastry|tart)/i,
-                title: "Snack Food / Single Baked Good",
-                desc: "Purchasing fewer than 6 sweet baked goods classifies them as snack foods, subject to the full 13% HST in Ontario.",
-                tagClass: "tag-hst",
-                tagName: "13% HST",
-                autoRate: 0.13
+                title: "Snack Food",
+                desc: "Fewer than 6 sweet baked goods are classified as snack foods (13% HST).",
+                tagClass: "tag-hst", tagName: "13% HST", autoRate: 0.13
             },
             {
-                // Fast food / Qualifying prepared food
                 regex: /(wendys|mcdonalds|burger king|tim hortons|subway|restaurant|fast food|takeout|take out|combo)/i,
                 title: "Prepared Food & Beverages",
-                desc: "Prepared meals carry a special rule in Ontario. If the total is $4.00 or under, you only pay the 5% Federal GST. If the total is over $4.00, the full 13% HST applies.",
-                tagClass: "tag-special",
-                tagName: "5% (≤ $4) OR 13% (> $4)",
-                autoRate: 0.13 // Defaults to 13% for calculator
+                desc: "Meals ≤ $4.00 pay 5% GST. Meals > $4.00 pay 13% HST.",
+                tagClass: "tag-special", tagName: "5% (≤ $4) OR 13% (> $4)", autoRate: 0.13
             },
             {
-                // Standard Grocery items
                 regex: /(grocery|loblaws|metro|milk|egg|bread|vegetable|fruit|meat|cheese|water)/i,
                 title: "Basic Groceries",
-                desc: "Unprepared basic groceries are zero-rated. No federal or provincial tax applies.",
-                tagClass: "tag-exempt",
-                tagName: "0% TAX (EXEMPT)",
-                autoRate: 0
+                desc: "Unprepared basic groceries are zero-rated.",
+                tagClass: "tag-exempt", tagName: "0% TAX (EXEMPT)", autoRate: 0
             },
             {
-                // Books
                 regex: /(book|textbook|novel)/i,
                 title: "Printed Books",
-                desc: "Printed books are exempt from the 8% Ontario portion. Only the 5% Federal GST applies.",
-                tagClass: "tag-special",
-                tagName: "5% GST ONLY",
-                autoRate: 0.05
+                desc: "Printed books are exempt from the 8% Ontario portion.",
+                tagClass: "tag-special", tagName: "5% GST ONLY", autoRate: 0.05
             },
             {
-                // Children's Clothing
                 regex: /(child|kid|baby).*(cloth|shoe|shirt|pant|jacket)/i,
-                title: "Children's Clothing & Footwear",
-                desc: "Children's clothing qualifies for an Ontario point-of-sale rebate. You only pay the 5% Federal GST.",
-                tagClass: "tag-special",
-                tagName: "5% GST ONLY",
-                autoRate: 0.05
+                title: "Children's Clothing",
+                desc: "Qualifies for an Ontario POS rebate. Only 5% GST applies.",
+                tagClass: "tag-special", tagName: "5% GST ONLY", autoRate: 0.05
             }
         ];
 
@@ -367,51 +368,40 @@
 
             if(!input.trim()) return;
 
-            let matchedRule = null;
+            // Hide keyboard on Android after search
+            document.getElementById('productSearch').blur(); 
 
-            // Search rules
+            let matchedRule = null;
             for(let rule of taxRules) {
-                if(rule.regex.test(input)) {
-                    matchedRule = rule;
-                    break;
-                }
+                if(rule.regex.test(input)) { matchedRule = rule; break; }
             }
 
-            // Fallback default rule
             if(!matchedRule) {
                 matchedRule = {
                     title: "Standard Goods & Services",
-                    desc: "Most tangible goods and professional services in Ontario fall under the standard Harmonized Sales Tax rate.",
-                    tagClass: "tag-hst",
-                    tagName: "13% HST",
-                    autoRate: 0.13
+                    desc: "Most goods and services in Ontario fall under the standard HST rate.",
+                    tagClass: "tag-hst", tagName: "13% HST", autoRate: 0.13
                 };
             }
 
-            // Update UI
             resTitle.innerText = matchedRule.title;
             resDesc.innerText = matchedRule.desc;
             resTag.className = `tax-tag ${matchedRule.tagClass}`;
             resTag.innerText = matchedRule.tagName;
-            
-            // Auto set calculator rate
             calcRateSelect.value = matchedRule.autoRate;
-
             resDiv.style.display = 'block';
         }
 
-        // --- 2. CLOUD SYNC & LEDGER PERSISTENCE ---
+        // --- 2. CLOUD SYNC & LEDGER ---
         let ledgerData = [];
         let syncId = localStorage.getItem('theSix_SyncID');
 
-        // Generate a pseudo-random sync ID if none exists
         if(!syncId) {
             syncId = 'SIX-' + Math.random().toString(36).substr(2, 6).toUpperCase();
             localStorage.setItem('theSix_SyncID', syncId);
         }
         document.getElementById('device-id').innerText = syncId;
 
-        // Initialize App
         function init() {
             const saved = localStorage.getItem(`theSix_Ledger_${syncId}`);
             if(saved) {
@@ -421,32 +411,33 @@
         }
 
         function calculateAndSave() {
-            const amtInput = document.getElementById('calc-amount').value;
+            const amtInput = document.getElementById('calc-amount');
             const rate = parseFloat(document.getElementById('calc-rate').value);
-            const subtotal = parseFloat(amtInput);
+            const subtotal = parseFloat(amtInput.value);
 
             if(isNaN(subtotal) || subtotal <= 0) {
-                alert("Please enter a valid amount.");
+                alert("Enter a valid amount.");
                 return;
             }
 
-            // Special Wendys/Restaurant logic check
+            amtInput.blur(); // Hide keyboard
+
             let actualRate = rate;
             let note = "";
             const query = document.getElementById('productSearch').value;
+            
             if(rate === 0.13 && /(wendys|mcdonalds|restaurant)/i.test(query) && subtotal <= 4.00) {
                 actualRate = 0.05;
-                note = "(Auto-adjusted: Meals ≤ $4 are 5%)";
+                note = "(Auto: Meals ≤ $4 are 5%)";
             }
 
             const tax = subtotal * actualRate;
             const total = subtotal + tax;
 
-            // Save to Ledger array
             const entry = {
                 id: Date.now(),
-                date: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                query: query || "Manual Calculation",
+                date: new Date().toLocaleDateString(undefined, {month:'short', day:'numeric'}) + " " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                query: query || "Manual Log",
                 subtotal: subtotal.toFixed(2),
                 tax: tax.toFixed(2),
                 total: total.toFixed(2),
@@ -454,7 +445,7 @@
                 note: note
             };
 
-            ledgerData.unshift(entry); // Add to top
+            ledgerData.unshift(entry);
             saveToCloud();
             renderLedger();
         }
@@ -464,7 +455,7 @@
             list.innerHTML = '';
 
             if(ledgerData.length === 0) {
-                list.innerHTML = '<li style="color: #666; text-align: center; padding: 20px;">No records yet. Calculate something above.</li>';
+                list.innerHTML = '<li style="color: #666; text-align: center; padding: 20px; font-size: 0.9rem;">No records. Calculate something above.</li>';
                 return;
             }
 
@@ -472,15 +463,15 @@
                 const li = document.createElement('li');
                 li.className = 'ledger-item';
                 li.innerHTML = `
-                    <div>
-                        <strong style="color: #fff; font-family: 'Orbitron', sans-serif;">$${item.total}</strong>
-                        <div style="font-size: 0.8rem; color: var(--neon-cyan); margin-top: 4px;">${item.query}</div>
-                        <div style="font-size: 0.75rem; color: #888; margin-top: 2px;">${item.date}</div>
+                    <div class="ledger-item-left">
+                        <strong style="color: #fff; font-family: 'Orbitron', sans-serif; font-size: 1.1rem;">$${item.total}</strong>
+                        <div style="font-size: 0.8rem; color: var(--neon-cyan); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.query}</div>
+                        <div style="font-size: 0.7rem; color: #888;">${item.date}</div>
                     </div>
-                    <div style="text-align: right; font-size: 0.85rem; color: #aaa;">
+                    <div class="ledger-item-right">
                         Sub: $${item.subtotal}<br>
                         Tax: $${item.tax} (${item.rateStr})<br>
-                        <span style="color: var(--gold); font-size: 0.7rem;">${item.note}</span>
+                        <span style="color: var(--gold); font-size: 0.65rem;">${item.note}</span>
                     </div>
                 `;
                 list.appendChild(li);
@@ -488,13 +479,11 @@
         }
 
         function saveToCloud() {
-            // In a real app, this would be an API call (e.g. fetch POST to Firebase).
-            // Here, we simulate "never erased" by tying it to the Sync ID in LocalStorage.
             localStorage.setItem(`theSix_Ledger_${syncId}`, JSON.stringify(ledgerData));
         }
 
         function promptRestore() {
-            const enteredId = prompt("Enter your 10-character Device Sync ID (e.g., SIX-XXXXXX):");
+            const enteredId = prompt("Enter 10-character Device ID (e.g., SIX-XXXXXX):");
             if(enteredId && enteredId.startsWith('SIX-')) {
                 syncId = enteredId.toUpperCase();
                 localStorage.setItem('theSix_SyncID', syncId);
@@ -503,23 +492,21 @@
                 const saved = localStorage.getItem(`theSix_Ledger_${syncId}`);
                 if(saved) {
                     ledgerData = JSON.parse(saved);
-                    alert("Ledger successfully synchronized from cloud profile.");
+                    alert("Ledger synchronized.");
                 } else {
                     ledgerData = [];
-                    alert("Sync ID connected. No previous history found for this ID.");
+                    alert("Connected. No history found.");
                 }
                 renderLedger();
             } else if (enteredId) {
-                alert("Invalid Sync ID format.");
+                alert("Invalid Sync ID.");
             }
         }
 
-        // Allow 'Enter' key on search
         document.getElementById('productSearch').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') analyzeTax();
         });
 
-        // Start
         init();
     </script>
 </body>

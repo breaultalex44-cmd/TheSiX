@@ -203,7 +203,8 @@
 
         .vault-stats {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 4px;
             font-size: 0.85rem;
             font-weight: 600;
         }
@@ -250,8 +251,19 @@
             align-items: center;
         }
 
-        .ledger-item-left { max-width: 60%; }
-        .ledger-item-right { text-align: right; font-size: 0.8rem; color: #aaa; }
+        .ledger-item-left { max-width: 55%; }
+        .ledger-item-right { text-align: right; font-size: 0.8rem; color: #aaa; display: flex; align-items: center; gap: 8px; }
+
+        .delete-item-btn {
+            background: none;
+            border: none;
+            color: var(--danger-red);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 4px;
+            transition: transform 0.1s;
+        }
+        .delete-item-btn:hover { transform: scale(1.15); }
 
         .cloud-sync-bar {
             background: rgba(64, 201, 255, 0.05);
@@ -300,17 +312,24 @@
             <div class="calc-flex-container">
                 <div class="input-group">
                     <label>Subtotal ($)</label>
-                    <input type="number" id="calc-amount" placeholder="0.00" step="0.01" inputmode="decimal">
+                    <input type="number" id="calc-amount" placeholder="0.00" step="0.01" inputmode="decimal" oninput="updateQuickEstimate()">
                 </div>
                 <div class="input-group">
                     <label>Tax Rate</label>
-                    <select id="calc-rate">
+                    <select id="calc-rate" onchange="updateQuickEstimate()">
                         <option value="0.13" style="color: black;">13% HST (Standard)</option>
                         <option value="0.05" style="color: black;">5% GST (Prepared < $4)</option>
                         <option value="0" style="color: black;">0% (Exempt)</option>
                     </select>
                 </div>
             </div>
+
+            <!-- Quick Compute Live Estimate Box -->
+            <div style="background: rgba(255,255,255,0.04); padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; border: 1px dashed rgba(255,255,255,0.15);">
+                <span>Est. Tax: <strong id="est-tax-val" style="color: var(--neon-cyan);">$0.00</strong></span>
+                <span>Est. Total: <strong id="est-tot-val" style="color: var(--gold);">$0.00</strong></span>
+            </div>
+
             <button class="btn" onclick="calculateAndSave()" style="background: linear-gradient(45deg, var(--gold), #997300); color: #000;">
                 <i class="fa-solid fa-plus"></i> Compute & Log to Vault
             </button>
@@ -319,7 +338,7 @@
         <!-- Right Column: The Vault & Ledger -->
         <div class="glass-card">
             
-            <!-- NEW BUDGET VAULT FEATURE -->
+            <!-- BUDGET VAULT -->
             <h2><i class="fa-solid fa-vault"></i> The Vault</h2>
             <div class="vault-container">
                 <div style="display: flex; gap: 10px;">
@@ -332,12 +351,17 @@
                 </div>
                 
                 <div class="vault-stats">
-                    <span id="budget-spent" style="color: #bbb;">Spent: $0.00</span>
-                    <span id="budget-remaining" style="color: var(--neon-cyan);">Left: $0.00</span>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span id="budget-spent" style="color: #bbb;">Spent: $0.00</span>
+                        <span id="budget-remaining" style="color: var(--neon-cyan);">Left: $0.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #888;">
+                        <span id="budget-tax">Total Tax Accrued: $0.00</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- EXISTING LEDGER -->
+            <!-- LEDGER -->
             <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid rgba(212, 175, 55, 0.3); padding-bottom: 8px; margin-bottom: 15px;">
                 <h2 style="border: none; margin: 0; padding: 0;"><i class="fa-solid fa-book-journal-whills"></i> Ledger</h2>
                 <button onclick="clearLedger()" style="background: none; border: 1px solid rgba(255,255,255,0.2); color: #aaa; font-size: 0.7rem; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Clear Cycle</button>
@@ -350,7 +374,7 @@
             <div class="cloud-sync-bar">
                 <i class="fa-solid fa-cloud" style="color: var(--neon-cyan);"></i> 
                 <span id="sync-status">Sync ID: <strong style="color: var(--neon-cyan)" id="device-id"></strong></span>
-                <button onclick="promptRestore()" style="background: none; border: 1px sold var(--neon-cyan); color: var(--neon-cyan); padding: 8px; border-radius: 5px; margin-top: 10px; cursor: pointer; width: 100%; font-weight: bold;">
+                <button onclick="promptRestore()" style="background: none; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 8px; border-radius: 5px; margin-top: 10px; cursor: pointer; width: 100%; font-weight: bold;">
                     <i class="fa-solid fa-rotate"></i> Import Device ID
                 </button>
             </div>
@@ -359,86 +383,74 @@
     </div>
 
     <script>
-        // --- 1. THE ORACLE TAX ENGINE (HEAVILY EXPANDED FOR ONTARIO CANADA) ---
+        // --- 1. THE ORACLE TAX ENGINE ---
         const taxRules = [
-            // 1. Bakery Rule: 6+ Sweet Baked Goods = Basic Groceries (0%)
             {
                 regex: /(6|six|7|seven|8|eight|9|nine|10|ten|11|eleven|12|dozen|multiple|box of).*(muffin|donut|doughnut|cookie|croissant|pastry|tart)/i,
                 title: "Basic Groceries (Zero-Rated)",
                 desc: "Purchasing 6 or more sweet baked goods categorizes them as basic groceries (100% tax exempt).",
                 tagClass: "tag-exempt", tagName: "0% TAX (EXEMPT)", autoRate: 0
             },
-            // 2. Bakery Rule: Single/Fewer than 6 = Snack Food (13%)
             {
                 regex: /(1|one|single|2|two|3|three|4|four|5|five).*(muffin|donut|doughnut|cookie|croissant|pastry|tart)/i,
                 title: "Snack Food",
                 desc: "Fewer than 6 sweet baked goods are classified as taxable snack foods (13% HST).",
                 tagClass: "tag-hst", tagName: "13% HST", autoRate: 0.13
             },
-            // 3. Fast Food & Restaurant Meals (Meals <= $4 = 5% GST, > $4 = 13% HST)
             {
                 regex: /(wendys|mcdonalds|burger king|tim hortons|subway|a&w|popeyes|kfc|starbucks|second cup|pizza|restaurant|fast food|takeout|take out|combo|hot meal|soup|salad|sandwich)/i,
                 title: "Prepared Food & Beverages",
                 desc: "Meals ≤ $4.00 qualify for 5% GST only (Ontario POS rebate). Meals > $4.00 pay 13% HST.",
                 tagClass: "tag-special", tagName: "5% (≤ $4) OR 13% (> $4)", autoRate: 0.13
             },
-            // 4. Taxable Snack Foods, Candies & Beverages (Always 13% even if under $4)
             {
                 regex: /(chips|crisps|pretzel|popcorn|candy|chocolate|gum|chewing gum|soft drink|soda|cola|energy drink|sports drink|gatorade|red bull|monster|iced tea|iced coffee|bottled beverage)/i,
                 title: "Taxable Snack Foods & Beverages",
                 desc: "Chips, candy, soft drinks, and carbonated/energy beverages are fully taxable at 13% HST regardless of price.",
                 tagClass: "tag-hst", tagName: "13% HST", autoRate: 0.13
             },
-            // 5. Basic Supermarket Groceries (0% Tax)
             {
                 regex: /(grocery|loblaws|metro|sobeys|no frills|food basics|walmart food|costco food|milk|cream|butter|cheese|yogurt|egg|bread|flour|sugar|salt|spice|vegetable|fruit|meat|beef|chicken|pork|fish|seafood|shrimp|rice|oat|cereal|pasta|bean|lentil|canned tomato|soup can|honey|maple syrup|coffee bean|tea bag|water|juice|produce)/i,
                 title: "Basic Groceries (Zero-Rated)",
                 desc: "Unprepared basic grocery items sold at supermarkets and grocery stores are 100% tax exempt.",
                 tagClass: "tag-exempt", tagName: "0% TAX (EXEMPT)", autoRate: 0
             },
-            // 6. Medical & Pharmacy Essentials (0% Tax)
             {
                 regex: /(prescription|pharmacy|insulin|asthma inhaler|medical device|wheelchair|hearing aid|tampon|pad|feminine hygiene)/i,
                 title: "Medical & Essential Supplies",
                 desc: "Prescription drugs, medical devices, and feminine hygiene products are zero-rated under CRA regulations.",
                 tagClass: "tag-exempt", tagName: "0% TAX (EXEMPT)", autoRate: 0
             },
-            // 7. Books & Printed Media (5% GST Only - Ontario POS Rebate)
             {
                 regex: /(book|textbook|novel|newspaper|magazine|childrens book)/i,
                 title: "Printed Books & Periodicals",
                 desc: "Qualifies for an Ontario point-of-sale rebate exempting the 8% provincial portion. Only 5% GST applies.",
                 tagClass: "tag-special", tagName: "5% GST ONLY", autoRate: 0.05
             },
-            // 8. Children's Clothing, Footwear & Diapers (5% GST Only - Ontario POS Rebate)
             {
                 regex: /(child|kid|baby|infant).*(cloth|shoe|shirt|pant|jacket|sock|diaper|car seat|booster seat)/i,
                 title: "Children's Clothing & Essentials",
                 desc: "Children's clothing, footwear, diapers, and car seats qualify for an Ontario POS rebate. Only 5% GST applies.",
                 tagClass: "tag-special", tagName: "5% GST ONLY", autoRate: 0.05
             },
-            // 9. Alcohol, Cannabis & Tobacco (13% HST)
             {
                 regex: /(beer|wine|liquor|spirits|alcohol|vodka|whiskey|cider|cannabis|weed|marijuana|vape|tobacco|cigarette)/i,
                 title: "Controlled Substances & Alcohol",
                 desc: "Alcohol, tobacco, and cannabis products are fully subject to the standard 13% HST.",
                 tagClass: "tag-hst", tagName: "13% HST", autoRate: 0.13
             },
-            // 10. Fuel & Petroleum (13% HST)
             {
                 regex: /(gas|gasoline|diesel|fuel|propane|oil)/i,
                 title: "Fuel & Petroleum",
                 desc: "Gasoline and automotive fuels are fully subject to 13% HST in Ontario.",
                 tagClass: "tag-hst", tagName: "13% HST", autoRate: 0.13
             },
-            // 11. Electronics, Tech & Digital Goods (13% HST)
             {
                 regex: /(phone|smartphone|laptop|computer|tablet|tv|television|headphone|electronics|software|app|subscription|streaming|netflix|spotify|video game)/i,
                 title: "Electronics & Digital Goods",
                 desc: "Consumer electronics, digital downloads, software, and streaming subscriptions are subject to 13% HST.",
                 tagClass: "tag-hst", tagName: "13% HST", autoRate: 0.13
             },
-            // 12. Over-the-Counter Medicine, Vitamins & Cosmetics (13% HST)
             {
                 regex: /(vitamin|supplement|advil|tylenol|aspirin|pain reliever|cough syrup|first aid|cosmetic|perfume|makeup|shampoo|soap|toothpaste|deodorant)/i,
                 title: "Over-the-Counter & Personal Care",
@@ -477,9 +489,21 @@
             resTag.innerText = matchedRule.tagName;
             calcRateSelect.value = matchedRule.autoRate;
             resDiv.style.display = 'block';
+            updateQuickEstimate();
         }
 
-        // --- 2. VAULT & LEDGER LOGIC ---
+        // --- 2. QUICK COMPUTE ESTIMATE LIVE UPDATER ---
+        function updateQuickEstimate() {
+            const subtotal = parseFloat(document.getElementById('calc-amount').value) || 0;
+            const rate = parseFloat(document.getElementById('calc-rate').value) || 0;
+            const tax = subtotal * rate;
+            const total = subtotal + tax;
+
+            document.getElementById('est-tax-val').innerText = `$${tax.toFixed(2)}`;
+            document.getElementById('est-tot-val').innerText = `$${total.toFixed(2)}`;
+        }
+
+        // --- 3. VAULT & LEDGER LOGIC ---
         let ledgerData = [];
         let vaultBudget = 0;
         let syncId = localStorage.getItem('theSix_SyncID');
@@ -501,6 +525,7 @@
 
             renderLedger();
             updateVaultUI();
+            updateQuickEstimate();
         }
 
         function setBudget() {
@@ -515,6 +540,7 @@
 
         function updateVaultUI() {
             let totalSpent = ledgerData.reduce((acc, curr) => acc + parseFloat(curr.total), 0);
+            let totalTaxAccrued = ledgerData.reduce((acc, curr) => acc + parseFloat(curr.tax), 0);
             let remaining = vaultBudget - totalSpent;
             
             let percent = 0;
@@ -527,6 +553,7 @@
             
             bar.style.width = percent + '%';
             document.getElementById('budget-spent').innerText = `Spent: $${totalSpent.toFixed(2)}`;
+            document.getElementById('budget-tax').innerText = `Total Tax Accrued: $${totalTaxAccrued.toFixed(2)}`;
 
             if (vaultBudget === 0) {
                 remText.innerText = "No Budget Set";
@@ -583,9 +610,10 @@
             ledgerData.unshift(entry);
             saveToCloud();
             renderLedger();
-            updateVaultUI(); // Update progress bar
+            updateVaultUI();
             
-            amtInput.value = ''; // clear input after log
+            amtInput.value = ''; 
+            updateQuickEstimate();
         }
 
         function renderLedger() {
@@ -607,13 +635,25 @@
                         <div style="font-size: 0.7rem; color: #888;">${item.date}</div>
                     </div>
                     <div class="ledger-item-right">
-                        Sub: $${item.subtotal}<br>
-                        Tax: $${item.tax} (${item.rateStr})<br>
-                        <span style="color: var(--gold); font-size: 0.65rem;">${item.note}</span>
+                        <div>
+                            Sub: $${item.subtotal}<br>
+                            Tax: $${item.tax} (${item.rateStr})<br>
+                            <span style="color: var(--gold); font-size: 0.65rem;">${item.note}</span>
+                        </div>
+                        <button class="delete-item-btn" onclick="deleteLedgerItem(${item.id})" title="Remove Item">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
                     </div>
                 `;
                 list.appendChild(li);
             });
+        }
+
+        function deleteLedgerItem(id) {
+            ledgerData = ledgerData.filter(item => item.id !== id);
+            saveToCloud();
+            renderLedger();
+            updateVaultUI();
         }
 
         function clearLedger() {
@@ -636,7 +676,7 @@
                 localStorage.setItem('theSix_SyncID', syncId);
                 document.getElementById('device-id').innerText = syncId;
                 
-                init(); // Reload from storage
+                init();
                 alert("Vault and Ledger synchronized to device ID.");
             } else if (enteredId) {
                 alert("Invalid Sync ID.");

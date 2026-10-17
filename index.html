@@ -231,7 +231,7 @@
         .tag-hst { background: rgba(255, 0, 100, 0.15); color: #ff0064; border: 1px solid #ff0064; }
         .tag-special { background: rgba(255, 200, 0, 0.15); color: #ffc800; border: 1px solid #ffc800; }
 
-        /* --- Ledger & Cloud Sync --- */
+        /* --- Ledger & Storage Info --- */
         .ledger-list {
             list-style: none;
             max-height: 200px; 
@@ -265,7 +265,7 @@
         }
         .delete-item-btn:hover { transform: scale(1.15); }
 
-        .cloud-sync-bar {
+        .storage-status-bar {
             background: rgba(64, 201, 255, 0.05);
             border: 1px solid rgba(64, 201, 255, 0.3);
             padding: 12px;
@@ -293,11 +293,11 @@
         <div class="glass-card">
             <h2><i class="fa-solid fa-magnifying-glass-chart"></i> The Oracle</h2>
             <p style="color: #aaa; margin-bottom: 15px; font-size: 0.85rem; line-height: 1.4;">
-                Search any item or scenario (e.g. "six muffins bakery", "Wendys combo", "milk", "iphones", "childrens shoes").
+                Search any item or context (e.g., "muffin at local bakery", "muffin at grocery store", "wendys combo", "milk", "iphones").
             </p>
             
             <div class="input-group">
-                <input type="text" id="productSearch" placeholder="Describe the item..." autocomplete="off">
+                <input type="text" id="productSearch" placeholder="Describe the item & place..." autocomplete="off">
             </div>
             
             <button class="btn" onclick="analyzeTax()"><i class="fa-solid fa-bolt"></i> Analyze Product</button>
@@ -375,23 +375,59 @@
                 <!-- Items populated by JS -->
             </ul>
 
-            <div class="cloud-sync-bar">
-                <i class="fa-solid fa-cloud" style="color: var(--neon-cyan);"></i> 
-                <span id="sync-status">Sync ID: <strong style="color: var(--neon-cyan)" id="device-id"></strong></span>
-                <button onclick="promptRestore()" style="background: none; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 8px; border-radius: 5px; margin-top: 10px; cursor: pointer; width: 100%; font-weight: bold;">
-                    <i class="fa-solid fa-rotate"></i> Import Device ID
-                </button>
+            <div class="storage-status-bar">
+                <i class="fa-solid fa-shield-halved" style="color: var(--neon-cyan);"></i> 
+                <span id="storage-status-text">2-Hour Leeway Persistence Active (<strong style="color: var(--neon-cyan)" id="cache-time-left">Active</strong>)</span>
             </div>
         </div>
 
     </div>
 
     <script>
-        // --- 1. THE ORACLE TAX ENGINE ---
+        // --- 1. LOCALIZED STORAGE WITH 2-HOUR LEEWAY CACHE MANAGEMENT ---
+        const CACHE_WINDOW_MS = 2 * 60 * 60 * 1000; // 2 hours leeway window
+        
+        function checkAndManageCache() {
+            const storedTimestamp = localStorage.getItem('theSix_CacheTimestamp');
+            const now = Date.now();
+
+            if (storedTimestamp) {
+                const age = now - parseInt(storedTimestamp, 10);
+                if (age > CACHE_WINDOW_MS) {
+                    // Exceeded 2 hours leeway, reset browser cache memory for the app
+                    localStorage.removeItem('theSix_Ledger');
+                    localStorage.removeItem('theSix_Vault');
+                    localStorage.setItem('theSix_CacheTimestamp', now.toString());
+                } else {
+                    // Refresh timestamp to maintain active sliding session window within leeway
+                    localStorage.setItem('theSix_CacheTimestamp', now.toString());
+                }
+            } else {
+                localStorage.setItem('theSix_CacheTimestamp', now.toString());
+            }
+        }
+
+        checkAndManageCache();
+
+        // --- 2. EXPANDED TAX CALCULATION ENGINE (PLACE-DIFFERENTIATED & BROAD CONTEXT) ---
         const taxRules = [
+            // Bakery vs Grocery Store Place Differentiators
+            {
+                regex: /(muffin|donut|doughnut|cookie|croissant|pastry|tart).*(bakery|cafe|coffee shop|patisserie|tim hortons|starbucks)/i,
+                title: "Bakery / Coffee Shop Single Item (Taxable)",
+                desc: "Baked goods sold at a bakery, coffee shop, or eating establishment in quantities under 6 are taxable at 13% HST.",
+                tagClass: "tag-hst", tagName: "13% HST", autoRate: 0.13
+            },
+            {
+                regex: /(muffin|donut|doughnut|cookie|croissant|pastry|tart).*(grocery|supermarket|loblaws|sobeys|no frills|food basics|walmart)/i,
+                title: "Supermarket / Grocery Bakery Item",
+                desc: "Single baked goods bought at a grocery store or supermarket. Quantities of 6+ qualify as zero-rated basic groceries.",
+                tagClass: "tag-hst", tagName: "13% HST (Single) / 0% (6+)", autoRate: 0.13
+            },
+            // General quantity rule fallback for baked goods
             {
                 regex: /(6|six|7|seven|8|eight|9|nine|10|ten|11|eleven|12|dozen|multiple|box of).*(muffin|donut|doughnut|cookie|croissant|pastry|tart)/i,
-                title: "Basic Groceries (Zero-Rated)",
+                title: "Basic Groceries (Zero-Rated Quantity)",
                 desc: "Purchasing 6 or more sweet baked goods categorizes them as basic groceries (100% tax exempt).",
                 tagClass: "tag-exempt", tagName: "0% TAX (EXEMPT)", autoRate: 0
             },
@@ -401,6 +437,20 @@
                 desc: "Fewer than 6 sweet baked goods are classified as taxable snack foods (13% HST).",
                 tagClass: "tag-hst", tagName: "13% HST", autoRate: 0.13
             },
+            // Coffee / Beverage Place Differentiators
+            {
+                regex: /(coffee|latte|espresso|cappuccino|tea).*(cafe|restaurant|starbucks|tim hortons|diner|mcdonalds|bistro)/i,
+                title: "Prepared Beverage (Restaurant/Cafe)",
+                desc: "Hot beverages prepared and served ready-to-consume at restaurants or cafes are subject to 13% HST.",
+                tagClass: "tag-hst", tagName: "13% HST", autoRate: 0.13
+            },
+            {
+                regex: /(coffee|latte|espresso|tea|beverage|water|juice).*(grocery|supermarket|convenience|gas station|corner store|loblaws|sobeys)/i,
+                title: "Retail Bottled Beverage / Grocery",
+                desc: "Prepackaged bottled beverages or coffee beans/tea bags sold at grocery or retail stores. Unsweetened bottled water is tax-exempt.",
+                tagClass: "tag-exempt", tagName: "0% (Water) / 13% (Juice/Soda)", autoRate: 0.13
+            },
+            // Prepared Food & Restaurants
             {
                 regex: /(wendys|mcdonalds|burger king|tim hortons|subway|a&w|popeyes|kfc|starbucks|second cup|pizza|restaurant|fast food|takeout|take out|combo|hot meal|soup|salad|sandwich)/i,
                 title: "Prepared Food & Beverages",
@@ -496,7 +546,7 @@
             updateQuickEstimate();
         }
 
-        // --- 2. QUICK COMPUTE ESTIMATE LIVE UPDATER ---
+        // --- 3. QUICK COMPUTE ESTIMATE LIVE UPDATER ---
         function updateQuickEstimate() {
             const subtotal = parseFloat(document.getElementById('calc-amount').value) || 0;
             const rate = parseFloat(document.getElementById('calc-rate').value) || 0;
@@ -507,23 +557,20 @@
             document.getElementById('est-tot-val').innerText = `$${total.toFixed(2)}`;
         }
 
-        // --- 3. VAULT & LEDGER LOGIC ---
+        // --- 4. VAULT & LOCALIZED STORAGE LEDGER LOGIC ---
         let ledgerData = [];
         let vaultBudget = 0;
-        let syncId = localStorage.getItem('theSix_SyncID');
-
-        if(!syncId) {
-            syncId = 'SIX-' + Math.random().toString(36).substr(2, 6).toUpperCase();
-            localStorage.setItem('theSix_SyncID', syncId);
-        }
-        document.getElementById('device-id').innerText = syncId;
 
         function init() {
-            const savedLedger = localStorage.getItem(`theSix_Ledger_${syncId}`);
-            const savedBudget = localStorage.getItem(`theSix_Vault_${syncId}`);
+            const savedLedger = localStorage.getItem('theSix_Ledger');
+            const savedBudget = localStorage.getItem('theSix_Vault');
             
-            if(savedLedger) ledgerData = JSON.parse(savedLedger);
-            if(savedBudget) vaultBudget = parseFloat(savedBudget);
+            if(savedLedger) {
+                try { ledgerData = JSON.parse(savedLedger); } catch(e) { ledgerData = []; }
+            }
+            if(savedBudget) {
+                vaultBudget = parseFloat(savedBudget) || 0;
+            }
             
             if(vaultBudget > 0) document.getElementById('budget-input').value = vaultBudget;
 
@@ -536,16 +583,16 @@
             const val = parseFloat(document.getElementById('budget-input').value);
             if(!isNaN(val) && val >= 0) {
                 vaultBudget = val;
-                localStorage.setItem(`theSix_Vault_${syncId}`, vaultBudget);
+                localStorage.setItem('theSix_Vault', vaultBudget.toString());
                 document.getElementById('budget-input').blur();
                 updateVaultUI();
-                renderLedger(); // Re-render ledger to update real-time budget percentages against new budget
+                renderLedger(); 
             }
         }
 
         function updateVaultUI() {
-            let totalSpent = ledgerData.reduce((acc, curr) => acc + parseFloat(curr.total), 0);
-            let totalTaxAccrued = ledgerData.reduce((acc, curr) => acc + parseFloat(curr.tax), 0);
+            let totalSpent = ledgerData.reduce((acc, curr) => acc + parseFloat(curr.total || 0), 0);
+            let totalTaxAccrued = ledgerData.reduce((acc, curr) => acc + parseFloat(curr.tax || 0), 0);
             let remaining = vaultBudget - totalSpent;
             
             let percent = 0;
@@ -616,7 +663,7 @@
             };
 
             ledgerData.unshift(entry);
-            saveToCloud();
+            saveLocalStorage();
             renderLedger();
             updateVaultUI();
             
@@ -663,7 +710,7 @@
 
         function deleteLedgerItem(id) {
             ledgerData = ledgerData.filter(item => item.id !== id);
-            saveToCloud();
+            saveLocalStorage();
             renderLedger();
             updateVaultUI();
         }
@@ -671,28 +718,16 @@
         function clearLedger() {
             if(confirm("Are you sure you want to clear your current Ledger? This will reset your budget spending.")) {
                 ledgerData = [];
-                saveToCloud();
+                saveLocalStorage();
                 renderLedger();
                 updateVaultUI();
             }
         }
 
-        function saveToCloud() {
-            localStorage.setItem(`theSix_Ledger_${syncId}`, JSON.stringify(ledgerData));
-        }
-
-        function promptRestore() {
-            const enteredId = prompt("Enter 10-character Device ID (e.g., SIX-XXXXXX):");
-            if(enteredId && enteredId.startsWith('SIX-')) {
-                syncId = enteredId.toUpperCase();
-                localStorage.setItem(`theSix_SyncID`, syncId);
-                document.getElementById('device-id').innerText = syncId;
-                
-                init();
-                alert("Vault and Ledger synchronized to device ID.");
-            } else if (enteredId) {
-                alert("Invalid Sync ID.");
-            }
+        function saveLocalStorage() {
+            localStorage.setItem('theSix_Ledger', JSON.stringify(ledgerData));
+            // Refresh sliding timestamp window on modifications
+            localStorage.setItem('theSix_CacheTimestamp', Date.now().toString());
         }
 
         document.getElementById('productSearch').addEventListener('keypress', function (e) {

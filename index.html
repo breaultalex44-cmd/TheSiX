@@ -405,7 +405,7 @@
         <div class="glass-card">
             <h2><i class="fa-solid fa-magnifying-glass-chart"></i> The Oracle</h2>
             <p style="color: #aaa; margin-bottom: 15px; font-size: 0.85rem; line-height: 1.4;">
-                Search any item or context (e.g., "muffin at local bakery", "muffin at grocery store", "wendys combo", "milk", "iphones").
+                Search any item or context (e.g., "6 muffins", "muffin at bakery", "wendys combo", "milk", "iphones").
             </p>
             
             <div class="input-group">
@@ -534,7 +534,14 @@
 
         // --- 2. EXPANDED TAX CALCULATION ENGINE (PLACE-DIFFERENTIATED & BROAD CONTEXT) ---
         const taxRules = [
-            // Bakery vs Grocery Store Place Differentiators
+            // Explicit Quantity 6+ Bakery / Sweet Baked Goods Rule (Prioritized first to ensure correct 0% zero-rated identification)
+            {
+                regex: /(6|six|7|seven|8|eight|9|nine|10|ten|11|eleven|12|dozen|multiple|box of|\d{2,})\s*(?:or more\s*)?(?:muffin|donut|doughnut|cookie|croissant|pastry|tart)/i,
+                title: "Basic Groceries (Zero-Rated Quantity 6+)",
+                desc: "Under CRA & Ontario tax regulations, purchasing 6 or more portions of sweet baked goods categorizes them as basic groceries (100% tax exempt / 0% tax).",
+                tagClass: "tag-exempt", tagName: "0% TAX (EXEMPT)", autoRate: 0
+            },
+            // Bakery vs Grocery Store Place Differentiators for single/small quantities (<6)
             {
                 regex: /(muffin|donut|doughnut|cookie|croissant|pastry|tart).*(bakery|cafe|coffee shop|patisserie|tim hortons|starbucks)/i,
                 title: "Bakery / Coffee Shop Single Item (Taxable)",
@@ -547,15 +554,9 @@
                 desc: "Single baked goods bought at a grocery store or supermarket. Quantities of 6+ qualify as zero-rated basic groceries.",
                 tagClass: "tag-hst", tagName: "13% HST (Single) / 0% (6+)", autoRate: 0.13
             },
-            // General quantity rule fallback for baked goods
+            // General small quantity rule fallback for baked goods (<6)
             {
-                regex: /(6|six|7|seven|8|eight|9|nine|10|ten|11|eleven|12|dozen|multiple|box of).*(muffin|donut|doughnut|cookie|croissant|pastry|tart)/i,
-                title: "Basic Groceries (Zero-Rated Quantity)",
-                desc: "Purchasing 6 or more sweet baked goods categorizes them as basic groceries (100% tax exempt).",
-                tagClass: "tag-exempt", tagName: "0% TAX (EXEMPT)", autoRate: 0
-            },
-            {
-                regex: /(1|one|single|2|two|3|three|4|four|5|five).*(muffin|donut|doughnut|cookie|croissant|pastry|tart)/i,
+                regex: /(1|one|single|2|two|3|three|4|four|5|five)\s*(?:muffin|donut|doughnut|cookie|croissant|pastry|tart)/i,
                 title: "Snack Food",
                 desc: "Fewer than 6 sweet baked goods are classified as taxable snack foods (13% HST).",
                 tagClass: "tag-hst", tagName: "13% HST", autoRate: 0.13
@@ -811,9 +812,9 @@
                 li.className = 'ledger-item';
                 li.innerHTML = `
                     <div class="ledger-item-left">
-                        <strong style="color: #fff; font-family: 'Orbitron', sans-serif; font-size: 1.1rem;">$${item.total}</strong>
+                        <strong style="color: #fff; font-family: 'Orbitron', sans-serif; font-size: 1.1rem;">$${item.total}</b>
                         <div style="font-size: 0.8rem; color: var(--neon-cyan); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.query}</div>
-                        <div style="font-size: 0.7rem; color: #888;">${item.date}</div>
+                        <div style="font-size: 0.7rem; color: #888;">${item.date}</i></div>
                     </div>
                     <div class="ledger-item-right">
                         <div>

@@ -50,12 +50,13 @@
         #app-splash-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: #050505;
+            background: radial-gradient(circle at center, #101018 0%, #030305 100%);
             z-index: 99999;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s;
+            overflow: hidden;
         }
         #app-splash-screen.fade-out {
             opacity: 0;
@@ -66,69 +67,81 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
-            padding: 20px;
-        }
-        .splash-icon-glow {
+            gap: 18px;
+            padding: 30px;
             position: relative;
-            width: 84px; height: 84px;
-            background: linear-gradient(135deg, rgba(232,28,255,0.2), rgba(64,201,255,0.2));
-            border: 2px solid var(--neon-magenta);
-            border-radius: 22px;
+            z-index: 2;
+        }
+        .splash-icon-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
             display: grid;
             place-items: center;
-            box-shadow: 0 0 30px rgba(232,28,255,0.4);
-            animation: splashPulse 2s infinite ease-in-out;
+        }
+        .splash-icon-glow {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(232,28,255,0.25), rgba(64,201,255,0.25));
+            border: 2px solid var(--neon-magenta);
+            border-radius: 28px;
+            box-shadow: 0 0 35px rgba(232,28,255,0.4), inset 0 0 15px rgba(64,201,255,0.3);
+            animation: splashPulse 2.5s infinite ease-in-out;
         }
         .splash-number {
+            position: relative;
+            z-index: 2;
             font-family: 'Cinzel', serif;
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: 800;
             color: #fff;
-            text-shadow: 0 0 12px var(--neon-cyan);
+            text-shadow: 0 0 16px var(--neon-cyan), 0 0 30px var(--neon-magenta);
         }
         .splash-content h1 {
             font-family: 'Cinzel', serif;
-            font-size: 2.2rem;
+            font-size: 2.4rem;
             color: #fff;
-            letter-spacing: 4px;
-            text-shadow: 0 0 15px var(--neon-magenta);
+            letter-spacing: 6px;
+            text-shadow: 0 0 20px rgba(232,28,255,0.8);
             margin: 0;
         }
         .splash-content p {
             font-family: 'Orbitron', sans-serif;
             font-size: 0.75rem;
             color: var(--neon-cyan);
-            letter-spacing: 3px;
+            letter-spacing: 4px;
             margin: 0;
+            opacity: 0.9;
         }
         .splash-loader-bar {
-            width: 200px;
+            width: 220px;
             height: 4px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 4px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
             overflow: hidden;
             margin-top: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
         .splash-loader-fill {
             width: 0%;
             height: 100%;
             background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
-            animation: loadFill 1.2s forwards cubic-bezier(0.1, 0.8, 0.3, 1);
+            box-shadow: 0 0 10px var(--neon-magenta);
+            animation: loadFill 1.4s forwards cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         .splash-status {
             font-size: 0.7rem;
             color: #888;
             font-family: 'Orbitron', sans-serif;
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
         }
         @keyframes splashPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(232,28,255,0.3); }
-            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(64,201,255,0.6); }
+            0%, 100% { transform: scale(1); box-shadow: 0 0 25px rgba(232,28,255,0.3); }
+            50% { transform: scale(1.06); box-shadow: 0 0 45px rgba(64,201,255,0.6); }
         }
         @keyframes loadFill {
             0% { width: 0%; }
-            60% { width: 80%; }
+            50% { width: 70%; }
             100% { width: 100%; }
         }
 
@@ -346,21 +359,99 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: opacity 0.2s, transform 0.2s;
         }
 
         .ledger-item-left { max-width: 50%; }
         .ledger-item-right { text-align: right; font-size: 0.75rem; color: #aaa; display: flex; align-items: center; gap: 8px; }
 
+        /* --- UI Safe Delete Controls --- */
         .delete-item-btn {
-            background: none;
-            border: none;
+            background: rgba(255, 51, 51, 0.1);
+            border: 1px solid rgba(255, 51, 51, 0.3);
             color: var(--danger-red);
+            border-radius: 6px;
+            padding: 6px 10px;
             cursor: pointer;
-            font-size: 0.9rem;
-            padding: 4px;
-            transition: transform 0.1s;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .delete-item-btn:hover { transform: scale(1.15); }
+        .delete-item-btn:hover {
+            background: rgba(255, 51, 51, 0.25);
+            border-color: var(--danger-red);
+            box-shadow: 0 0 8px rgba(255, 51, 51, 0.4);
+        }
+
+        .confirm-delete-box {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(20, 20, 25, 0.95);
+            border: 1px solid var(--danger-red);
+            padding: 4px 6px;
+            border-radius: 6px;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .confirm-btn-yes {
+            background: var(--danger-red);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .confirm-btn-no {
+            background: rgba(255,255,255,0.15);
+            color: #ccc;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        /* 3-Second Hold Delete All Ledger Button */
+        .btn-hold-delete {
+            position: relative;
+            background: rgba(255, 51, 51, 0.1);
+            border: 1px solid rgba(255, 51, 51, 0.4);
+            color: #ff8888;
+            font-size: 0.7rem;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            transition: border-color 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+        }
+        .btn-hold-delete .hold-progress {
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 0%;
+            background: rgba(255, 51, 51, 0.5);
+            pointer-events: none;
+            transition: width 0.1s linear;
+        }
+        .btn-hold-delete:hover {
+            border-color: var(--danger-red);
+            color: #fff;
+        }
 
         .storage-status-bar {
             background: rgba(64, 201, 255, 0.05);
@@ -378,7 +469,8 @@
     <!-- Startup Loading Screen Overlay -->
     <div id="app-splash-screen">
         <div class="splash-content">
-            <div class="splash-icon-glow">
+            <div class="splash-icon-wrapper">
+                <div class="splash-icon-glow"></div>
                 <span class="splash-number">6</span>
             </div>
             <h1>THE SiX</h1>
@@ -430,7 +522,7 @@
                     <label>Tax Rate</label>
                     <select id="calc-rate" onchange="updateQuickEstimate()">
                         <option value="0.13" style="color: black;">13% HST (Standard)</option>
-                        <option value="0.05" style="color: black;">5% GST (Prepared < $4)</option>
+                        <option value="0.05" style="color: black;">5% GST (Prepared &lt; $4)</option>
                         <option value="0" style="color: black;">0% (Exempt)</option>
                     </select>
                 </div>
@@ -478,9 +570,14 @@
             </div>
 
             <!-- LEDGER -->
-            <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid rgba(212, 175, 55, 0.3); padding-bottom: 8px; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(212, 175, 55, 0.3); padding-bottom: 8px; margin-bottom: 15px;">
                 <h2 style="border: none; margin: 0; padding: 0;"><i class="fa-solid fa-book-journal-whills"></i> Ledger</h2>
-                <button onclick="clearLedger()" style="background: none; border: 1px solid rgba(255,255,255,0.2); color: #aaa; font-size: 0.7rem; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Clear Cycle</button>
+                <!-- 3-Second Hold Delete Button -->
+                <button class="btn-hold-delete" id="hold-delete-btn" title="Hold 3s to clear entire ledger">
+                    <div class="hold-progress" id="hold-progress-bar"></div>
+                    <i class="fa-solid fa-trash-can" style="position: relative; z-index: 2;"></i>
+                    <span id="hold-btn-text" style="position: relative; z-index: 2;">Hold 3s Clear</span>
+                </button>
             </div>
             
             <ul class="ledger-list" id="ledger-list">
@@ -502,9 +599,9 @@
                 const splash = document.getElementById('app-splash-screen');
                 if (splash) {
                     splash.classList.add('fade-out');
-                    setTimeout(() => splash.remove(), 500);
+                    setTimeout(() => splash.remove(), 600);
                 }
-            }, 1200);
+            }, 1400);
         });
 
         // --- 1. LOCALIZED STORAGE WITH 2-HOUR LEEWAY CACHE MANAGEMENT ---
@@ -701,6 +798,7 @@
             renderLedger();
             updateVaultUI();
             updateQuickEstimate();
+            setup3SecondHoldDelete();
         }
 
         function setBudget() {
@@ -810,6 +908,7 @@
 
                 const li = document.createElement('li');
                 li.className = 'ledger-item';
+                li.id = `ledger-item-${item.id}`;
                 li.innerHTML = `
                     <div class="ledger-item-left">
                         <strong style="color: #fff; font-family: 'Orbitron', sans-serif; font-size: 1.1rem;">$${item.total}</b>
@@ -823,29 +922,100 @@
                             Budget Impact: <strong style="color: var(--neon-cyan);">${budgetEatingPercent}</strong><br>
                             <span style="color: var(--gold); font-size: 0.65rem;">${item.note}</span>
                         </div>
-                        <button class="delete-item-btn" onclick="deleteLedgerItem(${item.id})" title="Remove Item">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
+                        <div id="delete-container-${item.id}">
+                            <button class="delete-item-btn" onclick="promptDelete(${item.id})" title="Delete Item">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
                 list.appendChild(li);
             });
         }
 
-        function deleteLedgerItem(id) {
+        /* UI Safe Two-Step Delete Prompt */
+        function promptDelete(id) {
+            const container = document.getElementById(`delete-container-${id}`);
+            if(!container) return;
+            container.innerHTML = `
+                <div class="confirm-delete-box">
+                    <span style="font-size:0.65rem; color:#ff8888; font-weight:bold;">Delete?</span>
+                    <button class="confirm-btn-yes" onclick="confirmDelete(${id})">Yes</button>
+                    <button class="confirm-btn-no" onclick="cancelDelete(${id})">No</button>
+                </div>
+            `;
+        }
+
+        function cancelDelete(id) {
+            const container = document.getElementById(`delete-container-${id}`);
+            if(!container) return;
+            container.innerHTML = `
+                <button class="delete-item-btn" onclick="promptDelete(${id})" title="Delete Item">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            `;
+        }
+
+        function confirmDelete(id) {
             ledgerData = ledgerData.filter(item => item.id !== id);
             saveLocalStorage();
             renderLedger();
             updateVaultUI();
         }
 
-        function clearLedger() {
-            if(confirm("Are you sure you want to clear your current Ledger? This will reset your budget spending.")) {
-                ledgerData = [];
-                saveLocalStorage();
-                renderLedger();
-                updateVaultUI();
+        /* 3-Second Hold Logic for Clearing Entire Ledger */
+        function setup3SecondHoldDelete() {
+            const btn = document.getElementById('hold-delete-btn');
+            const progress = document.getElementById('hold-progress-bar');
+            const text = document.getElementById('hold-btn-text');
+            
+            let holdTimer = null;
+            let intervalTimer = null;
+            let startTime = 0;
+            const HOLD_DURATION = 3000; // 3 seconds
+
+            function startHold(e) {
+                if (ledgerData.length === 0) return;
+                e.preventDefault();
+                startTime = Date.now();
+                progress.style.width = '0%';
+                text.innerText = 'Holding...';
+
+                intervalTimer = setInterval(() => {
+                    const elapsed = Date.now() - startTime;
+                    const pct = Math.min((elapsed / HOLD_DURATION) * 100, 100);
+                    progress.style.width = pct + '%';
+                }, 30);
+
+                holdTimer = setTimeout(() => {
+                    clearHold();
+                    clearLedger();
+                }, HOLD_DURATION);
             }
+
+            function clearHold() {
+                clearTimeout(holdTimer);
+                clearInterval(intervalTimer);
+                holdTimer = null;
+                intervalTimer = null;
+                progress.style.width = '0%';
+                text.innerText = 'Hold 3s Clear';
+            }
+
+            btn.addEventListener('mousedown', startHold);
+            btn.addEventListener('mouseup', clearHold);
+            btn.addEventListener('mouseleave', clearHold);
+
+            btn.addEventListener('touchstart', startHold, { passive: false });
+            btn.addEventListener('touchend', clearHold);
+            btn.addEventListener('touchcancel', clearHold);
+        }
+
+        function clearLedger() {
+            ledgerData = [];
+            saveLocalStorage();
+            renderLedger();
+            updateVaultUI();
         }
 
         function saveLocalStorage() {
